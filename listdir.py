@@ -63,6 +63,8 @@ def export_csv(dir_path, csv_name):
     """
 
     files = []
+    if dir_path[len(dir_path) - 1] != '/':
+        dir_path += '/'
     for root, directories, file_names in os.walk(os.path.realpath(dir_path)):
         files.extend(glob.glob(root + "/*.*", recursive=True))
     
@@ -88,7 +90,7 @@ def check_valid_path(path):
     """
 
     real_path = os.path.realpath(path)
-    if (os.path.isfile(real_path)):
+    if os.path.isfile(real_path):
         return False
     return True if os.path.isdir(real_path) or os.path.exists(real_path) else False
 
