@@ -33,10 +33,12 @@ def get_dir_path(dir_path):
         Returns the whole path of the file with double quote marks
     """
 
-    replace_symb = dir_path.replace("\\", "/")
-    split_path = replace_symb.split("/")
-    split_path.pop()
-    return '"' + os.path.realpath("/".join(split_path)) + '"'
+    return f'"{os.path.dirname(os.path.abspath(dir_path))}"'
+    
+    # replace_symb = dir_path.replace("\\", "/")
+    # split_path = replace_symb.split("/")
+    # split_path.pop()
+    # return '"' + os.path.realpath("/".join(split_path)) + '"'
 
 def get_file_size(dir_path):
 
@@ -139,8 +141,10 @@ if __name__ == '__main__':
     config.read('config.ini')
 
     if not os.path.isdir(user_inp.directory):
-        if user_inp.directory not in '/' or user_inp.directory not in '\\':
-            export_csv(os.path.realpath(config['default_config']['directory']), user_inp.directory)
+        if user_inp.directory not in '/' or user_inp.directory not in '\\' or user_inp.directory == '':
+            file_name = config['default_config']['output_name']
+            config_dir = os.path.realpath(config['default_config']['directory'])
+            export_csv(config_dir, file_name)
         else:
             print(f"Invalid directory")
     elif user_inp.file_name == '':
