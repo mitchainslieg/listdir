@@ -5,9 +5,6 @@ Generates a CSV file  of all files within a directory or folder, these includes:
 - The size of the file
 
 Basic syntax in command line
-<<<<<<< Updated upstream
-> python listdir.py [Directory] [CSV File Name]
-=======
 > python listdir.py [-h] [-d] [-t] [directory] [file_name]
 
 Added two (2) optional arguments:
@@ -18,7 +15,6 @@ Added two (2) optional arguments:
 ```
 Both arguments are optional. There are default values for Directory and File Name and you can change it in the config.ini
 ```
->>>>>>> Stashed changes
 
 ```
 Note:

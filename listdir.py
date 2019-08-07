@@ -1,11 +1,8 @@
 from argparse import RawTextHelpFormatter
-<<<<<<< Updated upstream
-=======
 from datetime import datetime
 import configparser
 import zipfile
 import hashlib
->>>>>>> Stashed changes
 import argparse
 import os.path
 import glob
@@ -22,13 +19,9 @@ def get_file_name(dir_path_glob):
         
     """
 
-<<<<<<< Updated upstream
-    split_path = dir_path_glob.split("\\")
-=======
     # split_path = os.path.split(os.path.realpath(dir_path))
     # print(split_path)
     split_path = dir_path.split("\\")
->>>>>>> Stashed changes
     return '"' + split_path[len(split_path) - 1] + '"'
 
 def get_dir_path(dir_path_glob):
@@ -42,14 +35,7 @@ def get_dir_path(dir_path_glob):
         Returns the whole path of the file with double quote marks
     """
 
-<<<<<<< Updated upstream
-    replace_symb = dir_path_glob.replace("\\", "/")
-    split_path = replace_symb.split("/")
-    split_path.pop()
-    return '"' + os.path.realpath("/".join(split_path)) + '"'
-=======
     return f'"{os.path.dirname(os.path.abspath(dir_path))}"'
->>>>>>> Stashed changes
 
 def get_file_size(dir_path_glob):
 
@@ -66,9 +52,6 @@ def get_file_size(dir_path_glob):
     file_realpath = os.path.realpath(dir_path_glob)
     return os.path.getsize(file_realpath)
 
-<<<<<<< Updated upstream
-def export_csv(dir_path, csv_name):
-=======
 def get_file_hasher(dir_path):
     
     """Gets the hash value of a file in both MD5 and SHA1
@@ -93,7 +76,6 @@ def get_file_hasher(dir_path):
     return [hasher_md5.hexdigest(), hasher_sha1.hexdigest()]
 
 def export_csv(dir_path, csv_name, include_date, include_time):
->>>>>>> Stashed changes
 
     """Generates a file containing path, name and size of files within the directory
     
@@ -154,24 +136,6 @@ def check_valid_path(path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Exports all file information in a CSV file of all files in a directory/folder.\n"
                                                             "Remove any succeeding back slash '\\' if it prints out any errors")
-<<<<<<< Updated upstream
-    parser.add_argument("directory", type=str, help="Full path of a folder")
-    parser.add_argument("file_name", type=str, help="CSV file name\nexample: file_name.csv")
-    user_inp = parser.parse_args()
-    if check_valid_path(user_inp.directory):
-        destination_file = user_inp.file_name.split('.')
-        if len(destination_file) > 1:
-            if destination_file[len(destination_file) - 1] == 'csv':
-                export_csv(user_inp.directory, ".".join(destination_file))
-                print("Command Executed!")
-            else:
-                print("Invalid File name!")
-        else:
-            print("Command Executed!")
-            export_csv(user_inp.directory, destination_file[0] + '.csv')
-    else:
-        print("Invalid path!")
-=======
     parser.add_argument("directory", help="Full path of a folder", default='', nargs="?")
     parser.add_argument("file_name", help="File name for the output", default='', nargs="?")
     parser.add_argument("-d", "--date", action="store_true", help="Include date in the file name", default='')
@@ -204,4 +168,3 @@ if __name__ == '__main__':
         export_csv(user_inp.directory, os.path.realpath(config['default']['output_name']), include_date, include_time)
     else:
         export_csv(user_inp.directory, user_inp.file_name, include_date, include_time)
->>>>>>> Stashed changes
