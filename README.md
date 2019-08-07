@@ -1,18 +1,21 @@
 ## listdir.py
-Generates a file that list all the files within a directory or folder, these list includes:
-1. The parent directory of the file
-2. The file name
-3. The size of the file
-4. The MD5 value of the file
-5. The SHA1 value of the file
+Generates a CSV file  of all files within a directory or folder, these includes:
+- Full directory of a file
+- The name of the file
+- The size of the file
 
 Basic syntax in command line
+<<<<<<< HEAD
 > python listdir.py [Directory] [File Name]
 ```
 Both arguments are optional. There are default values for Directory and File Name and you can change it in the config.ini
 ```
+=======
+> python listdir.py [Directory] [CSV File Name]
+>>>>>>> parent of 1977c57... Updates listdir.py for Machine Problem: listdir with hashes
 
 ```
 Note:
-  - Remove any succeeding backslash from the end of the directory to avoid any errors
+  - Remove any succeeding backslash from the end of the directory
+  - You can prove any name for the csv file without adding the .csv extension
 ```

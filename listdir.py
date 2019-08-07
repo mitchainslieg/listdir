@@ -1,82 +1,69 @@
 from argparse import RawTextHelpFormatter
+<<<<<<< HEAD
 import configparser
 import zipfile
 import hashlib
+=======
+>>>>>>> parent of 1977c57... Updates listdir.py for Machine Problem: listdir with hashes
 import argparse
 import os.path
 import glob
 import re
 
-def get_file_name(dir_path):
+def get_file_name(dir_path_glob):
 
     """Getting the file name from path
     
     Arguments:
-        dir_path -- Contains the path of the file
+        dir_path_glob -- Contains the path of the file
     
     Returns:
         File name from the path
         
     """
 
-    split_path = dir_path.split("\\")
+    split_path = dir_path_glob.split("\\")
     return '"' + split_path[len(split_path) - 1] + '"'
 
-def get_dir_path(dir_path):
+def get_dir_path(dir_path_glob):
 
     """From glob's path, it replaces all double back slash to one forward slash
     
     Arguments:
-        dir_path -- Contains the path of the file
+        dir_path_glob -- Contains the path of the file
     
     Returns:
         Returns the whole path of the file with double quote marks
     """
 
+<<<<<<< HEAD
     return f'"{os.path.dirname(os.path.abspath(dir_path))}"'
     
     # replace_symb = dir_path.replace("\\", "/")
     # split_path = replace_symb.split("/")
     # split_path.pop()
     # return '"' + os.path.realpath("/".join(split_path)) + '"'
+=======
+    replace_symb = dir_path_glob.replace("\\", "/")
+    split_path = replace_symb.split("/")
+    split_path.pop()
+    return '"' + os.path.realpath("/".join(split_path)) + '"'
+>>>>>>> parent of 1977c57... Updates listdir.py for Machine Problem: listdir with hashes
 
-def get_file_size(dir_path):
+def get_file_size(dir_path_glob):
 
     """A function to get the file size
     
     Arguments:
-        dir_path -- Contains the path of the file
+        dir_path_glob -- Contains the path of the file
 
     Returns
         Returns the file size of the file using the getsize method from os.path
 
     """
 
-    file_realpath = os.path.realpath(dir_path)
+    file_realpath = os.path.realpath(dir_path_glob)
     return os.path.getsize(file_realpath)
-
-def get_file_hasher(dir_path):
-    
-    """Gets the hash value of a file in both MD5 and SHA1
-    
-    Arguments:
-        dir_path -- Contains the path of the file
-    
-    Returns:
-        Returns a list that contains the md5 and sha1 value of a file
-    """
-    
-    file_realpath = os.path.realpath(dir_path)
-    hasher_md5 = hashlib.md5()
-    hasher_sha1 = hashlib.sha1()
-    try:
-        with open(file_realpath, 'rb') as afile:
-            buf = afile.read()
-            hasher_md5.update(buf)
-            hasher_sha1.update(buf)
-    except Exception as e:
-        print(e)
-    return [hasher_md5.hexdigest(), hasher_sha1.hexdigest()]
 
 def export_csv(dir_path, csv_name):
 
@@ -100,16 +87,9 @@ def export_csv(dir_path, csv_name):
     try:
         with open(csv_name, "w") as new_file:
             file_list = []
-            file_list.append(f'File Directory,File Name,File Size,MD5,SHA1')
             for file_info in files:
-                if os.path.isfile(file_info):
-                    file_list.append(f"{get_dir_path(file_info)},{get_file_name(file_info)},{get_file_size(file_info)},{get_file_hasher(file_info)[0]},{get_file_hasher(file_info)[1]}")
+                file_list.append(f"{get_dir_path(file_info)},{get_file_name(file_info)},{get_file_size(file_info)}")
             new_file.write("\n".join(file_list))
-        
-        with zipfile.ZipFile(csv_name + '.zip', 'w') as zip_file:
-            zip_file.write(csv_name)
-            print("Success!")
-
     except Exception as e:
         return e
     return True
@@ -131,8 +111,9 @@ def check_valid_path(path):
     return True if os.path.isdir(real_path) or os.path.exists(real_path) else False
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Exports all file information into a file, it includes all files in a directory/folder.\n"
+    parser = argparse.ArgumentParser(description="Exports all file information in a CSV file of all files in a directory/folder.\n"
                                                             "Remove any succeeding back slash '\\' if it prints out any errors")
+<<<<<<< HEAD
     parser.add_argument("directory", help="Full path of a folder", default='', nargs="?")
     parser.add_argument("file_name", help="File Name", default='', nargs="?")
     user_inp = parser.parse_args()
@@ -149,5 +130,21 @@ if __name__ == '__main__':
             print(f"Invalid directory")
     elif user_inp.file_name == '':
         export_csv(user_inp.directory, os.path.realpath(config['default_config']['output_name']))
+=======
+    parser.add_argument("directory", type=str, help="Full path of a folder")
+    parser.add_argument("file_name", type=str, help="CSV file name\nexample: file_name.csv")
+    user_inp = parser.parse_args()
+    if check_valid_path(user_inp.directory):
+        destination_file = user_inp.file_name.split('.')
+        if len(destination_file) > 1:
+            if destination_file[len(destination_file) - 1] == 'csv':
+                export_csv(user_inp.directory, ".".join(destination_file))
+                print("Command Executed!")
+            else:
+                print("Invalid File name!")
+        else:
+            print("Command Executed!")
+            export_csv(user_inp.directory, destination_file[0] + '.csv')
+>>>>>>> parent of 1977c57... Updates listdir.py for Machine Problem: listdir with hashes
     else:
         export_csv(user_inp.directory, user_inp.file_name)
