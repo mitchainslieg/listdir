@@ -1,10 +1,4 @@
 from argparse import RawTextHelpFormatter
-<<<<<<< HEAD
-import configparser
-import zipfile
-import hashlib
-=======
->>>>>>> parent of 1977c57... Updates listdir.py for Machine Problem: listdir with hashes
 import argparse
 import os.path
 import glob
@@ -36,19 +30,10 @@ def get_dir_path(dir_path_glob):
         Returns the whole path of the file with double quote marks
     """
 
-<<<<<<< HEAD
-    return f'"{os.path.dirname(os.path.abspath(dir_path))}"'
-    
-    # replace_symb = dir_path.replace("\\", "/")
-    # split_path = replace_symb.split("/")
-    # split_path.pop()
-    # return '"' + os.path.realpath("/".join(split_path)) + '"'
-=======
     replace_symb = dir_path_glob.replace("\\", "/")
     split_path = replace_symb.split("/")
     split_path.pop()
     return '"' + os.path.realpath("/".join(split_path)) + '"'
->>>>>>> parent of 1977c57... Updates listdir.py for Machine Problem: listdir with hashes
 
 def get_file_size(dir_path_glob):
 
@@ -113,24 +98,6 @@ def check_valid_path(path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Exports all file information in a CSV file of all files in a directory/folder.\n"
                                                             "Remove any succeeding back slash '\\' if it prints out any errors")
-<<<<<<< HEAD
-    parser.add_argument("directory", help="Full path of a folder", default='', nargs="?")
-    parser.add_argument("file_name", help="File Name", default='', nargs="?")
-    user_inp = parser.parse_args()
-
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-
-    if not os.path.isdir(user_inp.directory):
-        if user_inp.directory not in '/' or user_inp.directory not in '\\' or user_inp.directory == '':
-            file_name = config['default_config']['output_name']
-            config_dir = os.path.realpath(config['default_config']['directory'])
-            export_csv(config_dir, file_name)
-        else:
-            print(f"Invalid directory")
-    elif user_inp.file_name == '':
-        export_csv(user_inp.directory, os.path.realpath(config['default_config']['output_name']))
-=======
     parser.add_argument("directory", type=str, help="Full path of a folder")
     parser.add_argument("file_name", type=str, help="CSV file name\nexample: file_name.csv")
     user_inp = parser.parse_args()
@@ -145,6 +112,5 @@ if __name__ == '__main__':
         else:
             print("Command Executed!")
             export_csv(user_inp.directory, destination_file[0] + '.csv')
->>>>>>> parent of 1977c57... Updates listdir.py for Machine Problem: listdir with hashes
     else:
         export_csv(user_inp.directory, user_inp.file_name)
