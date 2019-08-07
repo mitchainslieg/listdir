@@ -6,13 +6,14 @@ import hashlib
 import argparse
 import os.path
 import glob
+import re
 
-def get_file_name(dir_path_glob):
+def get_file_name(dir_path):
 
     """Getting the file name from path
     
     Arguments:
-        dir_path_glob -- Contains the path of the file
+        dir_path -- Contains the path of the file
     
     Returns:
         File name from the path
@@ -24,12 +25,12 @@ def get_file_name(dir_path_glob):
     split_path = dir_path.split("\\")
     return '"' + split_path[len(split_path) - 1] + '"'
 
-def get_dir_path(dir_path_glob):
+def get_dir_path(dir_path):
 
     """From glob's path, it replaces all double back slash to one forward slash
     
     Arguments:
-        dir_path_glob -- Contains the path of the file
+        dir_path -- Contains the path of the file
     
     Returns:
         Returns the whole path of the file with double quote marks
@@ -37,19 +38,19 @@ def get_dir_path(dir_path_glob):
 
     return f'"{os.path.dirname(os.path.abspath(dir_path))}"'
 
-def get_file_size(dir_path_glob):
+def get_file_size(dir_path):
 
     """A function to get the file size
     
     Arguments:
-        dir_path_glob -- Contains the path of the file
+        dir_path -- Contains the path of the file
 
     Returns
         Returns the file size of the file using the getsize method from os.path
 
     """
 
-    file_realpath = os.path.realpath(dir_path_glob)
+    file_realpath = os.path.realpath(dir_path)
     return os.path.getsize(file_realpath)
 
 def get_file_hasher(dir_path):
@@ -110,9 +111,16 @@ def export_csv(dir_path, csv_name, include_date, include_time):
     try:
         with open(csv_name, "w") as new_file:
             file_list = []
+            file_list.append(f'File Directory,File Name,File Size,MD5,SHA1')
             for file_info in files:
-                file_list.append(f"{get_dir_path(file_info)},{get_file_name(file_info)},{get_file_size(file_info)}")
+                if os.path.isfile(file_info):
+                    file_list.append(f"{get_dir_path(file_info)},{get_file_name(file_info)},{get_file_size(file_info)},{get_file_hasher(file_info)[0]},{get_file_hasher(file_info)[1]}")
             new_file.write("\n".join(file_list))
+        
+        with zipfile.ZipFile(csv_name + '.zip', 'w') as zip_file:
+            zip_file.write(csv_name)
+            print("Success!")
+
     except Exception as e:
         return e
     return True
@@ -134,7 +142,7 @@ def check_valid_path(path):
     return True if os.path.isdir(real_path) or os.path.exists(real_path) else False
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Exports all file information in a CSV file of all files in a directory/folder.\n"
+    parser = argparse.ArgumentParser(description="Exports all file information into a file, it includes all files in a directory/folder.\n"
                                                             "Remove any succeeding back slash '\\' if it prints out any errors")
     parser.add_argument("directory", help="Full path of a folder", default='', nargs="?")
     parser.add_argument("file_name", help="File name for the output", default='', nargs="?")
