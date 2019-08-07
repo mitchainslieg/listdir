@@ -1,9 +1,11 @@
 from argparse import RawTextHelpFormatter
+import configparser
 import zipfile
 import hashlib
 import argparse
 import os.path
 import glob
+import re
 
 def get_file_name(dir_path):
 
@@ -31,10 +33,12 @@ def get_dir_path(dir_path):
         Returns the whole path of the file with double quote marks
     """
 
-    replace_symb = dir_path.replace("\\", "/")
-    split_path = replace_symb.split("/")
-    split_path.pop()
-    return '"' + os.path.realpath("/".join(split_path)) + '"'
+    return f'"{os.path.dirname(os.path.abspath(dir_path))}"'
+    
+    # replace_symb = dir_path.replace("\\", "/")
+    # split_path = replace_symb.split("/")
+    # split_path.pop()
+    # return '"' + os.path.realpath("/".join(split_path)) + '"'
 
 def get_file_size(dir_path):
 
@@ -129,10 +133,21 @@ def check_valid_path(path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Exports all file information into a file, it includes all files in a directory/folder.\n"
                                                             "Remove any succeeding back slash '\\' if it prints out any errors")
-    parser.add_argument("directory", type=str, help="Full path of a folder")
-    parser.add_argument("file_name", type=str, help="File Name")
+    parser.add_argument("directory", help="Full path of a folder", default='', nargs="?")
+    parser.add_argument("file_name", help="File Name", default='', nargs="?")
     user_inp = parser.parse_args()
-    if check_valid_path(user_inp.directory):
-        export_csv(user_inp.directory, user_inp.file_name)
+
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
+    if not os.path.isdir(user_inp.directory):
+        if user_inp.directory not in '/' or user_inp.directory not in '\\' or user_inp.directory == '':
+            file_name = config['default_config']['output_name']
+            config_dir = os.path.realpath(config['default_config']['directory'])
+            export_csv(config_dir, file_name)
+        else:
+            print(f"Invalid directory")
+    elif user_inp.file_name == '':
+        export_csv(user_inp.directory, os.path.realpath(config['default_config']['output_name']))
     else:
-        print("Invalid path!")
+        export_csv(user_inp.directory, user_inp.file_name)

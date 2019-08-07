@@ -8,6 +8,9 @@ Generates a file that list all the files within a directory or folder, these lis
 
 Basic syntax in command line
 > python listdir.py [Directory] [File Name]
+```
+Both arguments are optional. There are default values for Directory and File Name and you can change it in the config.ini
+```
 
 ```
 Note:
