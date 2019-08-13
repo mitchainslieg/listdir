@@ -6,53 +6,8 @@ import hashlib
 import argparse
 import os.path
 import glob
-import re
-
-def get_file_name(dir_path):
-
-    """Getting the file name from path
+import time
     
-    Arguments:
-        dir_path -- Contains the path of the file
-    
-    Returns:
-        File name from the path
-        
-    """
-
-    # split_path = os.path.split(os.path.realpath(dir_path))
-    # print(split_path)
-    split_path = dir_path.split("\\")
-    return '"' + split_path[len(split_path) - 1] + '"'
-
-def get_dir_path(dir_path):
-
-    """From glob's path, it replaces all double back slash to one forward slash
-    
-    Arguments:
-        dir_path -- Contains the path of the file
-    
-    Returns:
-        Returns the whole path of the file with double quote marks
-    """
-
-    return f'"{os.path.dirname(os.path.abspath(dir_path))}"'
-
-def get_file_size(dir_path):
-
-    """A function to get the file size
-    
-    Arguments:
-        dir_path -- Contains the path of the file
-
-    Returns
-        Returns the file size of the file using the getsize method from os.path
-
-    """
-
-    file_realpath = os.path.realpath(dir_path)
-    return os.path.getsize(file_realpath)
-
 def get_file_hasher(dir_path):
     
     """Gets the hash value of a file in both MD5 and SHA1
@@ -63,12 +18,10 @@ def get_file_hasher(dir_path):
     Returns:
         Returns a list that contains the md5 and sha1 value of a file
     """
-    
-    file_realpath = os.path.realpath(dir_path)
     hasher_md5 = hashlib.md5()
     hasher_sha1 = hashlib.sha1()
     try:
-        with open(file_realpath, 'rb') as afile:
+        with open(dir_path, 'rb') as afile:
             buf = afile.read()
             hasher_md5.update(buf)
             hasher_sha1.update(buf)
@@ -76,9 +29,32 @@ def get_file_hasher(dir_path):
         print(e)
     return [hasher_md5.hexdigest(), hasher_sha1.hexdigest()]
 
+def generate_file_info(file_rpath):
+    """This function acts as a generator and reads all files from a given directory and 
+            generates informations about that file
+
+        Arguments:
+            file_rpath -- Path or directory provided by the user
+
+        Yields:
+            A dictionary that contains information for each file inside the directory
+
+    """
+    files = glob.iglob(f"{file_rpath}/**/*.*", recursive=True)
+    files_directory = [os.path.realpath(file_path) for file_path in files if os.path.isfile(file_path)]
+    for file_dir in files_directory:
+        file_info = {
+            "parent_path" : f"\"{os.path.dirname(file_dir)}\"",
+            "file_name" : f"\"{os.path.basename(file_dir)}\"",
+            "file_size" : os.path.getsize(file_dir),
+            "md5" : get_file_hasher(file_dir)[0],
+            "sha1" : get_file_hasher(file_dir)[1]
+        }
+        yield file_info
+
 def export_csv(dir_path, csv_name, include_date, include_time):
 
-    """Generates a file containing path, name and size of files within the directory
+    """Generates a file containing path, name, size, md5 and sha1 of files within the directory
     
     Arguments:
         dir_path -- Contains the path of the directory or folder
@@ -102,23 +78,16 @@ def export_csv(dir_path, csv_name, include_date, include_time):
         zip_name += f" {timestamp_date}"
     elif include_time:
         zip_name += f" {timestamp_time}"
-
-    files = []
-    if dir_path[len(dir_path) - 1] != '/':
-        dir_path += '/'
-    for root, directories, file_names in os.walk(os.path.realpath(dir_path)):
-        files.extend(glob.iglob(root + "/*.*", recursive=True))
+    
+    file_rpath = os.path.realpath(dir_path)
     
     try:
+        print("Running...")
         with open(csv_name, "w") as new_file:
-            file_list = []
-            file_list.append(f'File Directory,File Name,File Size,MD5,SHA1')
-            for file_info in files:
-                if os.path.isfile(file_info):
-                    file_list.append(f"{get_dir_path(file_info)},{get_file_name(file_info)},{get_file_size(file_info)},{get_file_hasher(file_info)[0]},{get_file_hasher(file_info)[1]}")
-            new_file.write("\n".join(file_list))
+            for line in generate_file_info(file_rpath):
+                new_file.write(f"{line['parent_path']},{line['file_name']},{line['file_size']},{line['md5']},{line['sha1']}\n")
         
-        with zipfile.ZipFile(zip_name + '.zip', 'w') as zip_file:
+        with zipfile.ZipFile(zip_name + '.zip', 'w') as zip_file:    
             zip_file.write(csv_name)
             print("Success!")
 
@@ -154,15 +123,6 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('config.ini')
 
-    include_date = False
-    include_time = False
-
-    if user_inp.date:
-        include_date = True
-    
-    if user_inp.time:
-        include_time = True
-
     if not os.path.isdir(user_inp.directory):
         if "/" in user_inp.directory or "\\" in user_inp.directory:
             print(f"Invalid path or file name")
@@ -172,8 +132,8 @@ if __name__ == '__main__':
             else:
                 file_name = user_inp.directory
             config_dir = os.path.realpath(config['default']['directory'])
-            export_csv(config_dir, file_name, include_date, include_time)
+            export_csv(config_dir, file_name, user_inp.date, user_inp.time)
     elif user_inp.file_name == '':
-        export_csv(user_inp.directory, os.path.realpath(config['default']['output_name']), include_date, include_time)
+        export_csv(user_inp.directory, os.path.realpath(config['default']['output_name']), user_inp.date, user_inp.time)
     else:
-        export_csv(user_inp.directory, user_inp.file_name, include_date, include_time)
+        export_csv(user_inp.directory, user_inp.file_name, user_inp.date, user_inp.time)
