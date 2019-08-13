@@ -33,3 +33,8 @@ Then import it by:
 ```
 import date-time-pkg
 ```
+
+Updates
+```
+1. Implemented list comprehension and generators
+```
