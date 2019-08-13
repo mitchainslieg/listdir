@@ -24,3 +24,12 @@ Note:
   - You can prove any name for the csv file without adding the .csv extension
   - Remove any succeeding backslash from the end of the directory to avoid any errors
 ```
+
+To install the package, on your command line type the following:
+```
+pip install -i https://test.pypi.org/simple/ date-time-pkg
+```
+Then import it by:
+```
+import date-time-pkg
+```
