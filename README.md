@@ -7,7 +7,7 @@ Generates a zip file that contains the CSV/JSON file. The csv/json/file includes
 5. and the SHA1 value of the file
 
 Basic syntax in command line
-> python listdir.py [-h] [-d] [-t] [directory] [file_name]
+> python listdir.py [-h] [-d] [-t] [-j] [directory] [file_name]
 
 Optional Arguments (1 new argument):
 ```
