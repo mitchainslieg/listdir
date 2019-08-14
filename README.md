@@ -21,6 +21,8 @@ Note:
   - You can prove any name for the csv file without adding the .csv extension
   - Remove any succeeding backslash from the end of the directory to avoid any errors
   - If the file name and file type is not specified, there will be a default value from config.ini and is changeable
+  - Upon executing any commands, there will be a log and will be enlisted in a rolling log file called logs.log
+  - The rolling log file is limited to 5 MB each and a maximum of 5 log file
 ```
 
 ##Packaging
@@ -36,5 +38,5 @@ import date_time
 
 Updates:
 ```
-- Implemented list comprehension and generators
+- Added logging feature
 ```

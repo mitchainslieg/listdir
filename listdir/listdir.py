@@ -13,8 +13,15 @@ import logging.config
 import yaml
 
 def setup_logging(default_path='log_config.yaml', default_level=logging.INFO, env_key='LOG_CFG'):
-    """Setup logging configuration
-
+    """This function setups the logging function which will be used to print out progress, errors and etc.
+    
+    Arguments:
+        default_path -- Contains the path of the YAML file
+        default_level -- If the YAML file does not exist, logging.INFO will be the default level for basicConfig
+        env_key -- return a path to logging configuration if it exist
+    
+    Returns:
+        Returns a list that contains the md5 and sha1 value of a file
     """
     path = os.path.realpath(default_path)
     value = os.getenv(env_key, None)
@@ -50,6 +57,7 @@ def get_file_hasher(dir_path):
     return [hasher_md5.hexdigest(), hasher_sha1.hexdigest()]
 
 def generate_file_info(file_rpath):
+    
     """This function acts as a generator and reads all files from a given directory and 
             generates informations about that file
 
