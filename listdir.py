@@ -95,12 +95,13 @@ def export_csv(dir_path, csv_name, include_date, include_time):
     timestamp_date = timestamp.strftime("%Y-%m-%d")
     timestamp_time = timestamp.strftime("%H-%M-%S")
 
+    zip_file = csv_name
     if include_date and include_time:
-        zip_name = f"{csv_name} {timestamp_date}_{timestamp_time}"
+        zip_file += f" {timestamp_date}_{timestamp_time}"
     elif include_date:
-        zip_name = f"{csv_name} {timestamp_date}"
+        zip_file += f" {timestamp_date}"
     elif include_time:
-        zip_name = f"{csv_name} {timestamp_time}"
+        zip_file += f" {timestamp_time}"
 
     files = []
     if dir_path[len(dir_path) - 1] != '/':
@@ -117,7 +118,7 @@ def export_csv(dir_path, csv_name, include_date, include_time):
                     file_list.append(f"{get_dir_path(file_info)},{get_file_name(file_info)},{get_file_size(file_info)},{get_file_hasher(file_info)[0]},{get_file_hasher(file_info)[1]}")
             new_file.write("\n".join(file_list))
         
-        with zipfile.ZipFile(zip_name + '.zip', 'w') as zip_file:
+        with zipfile.ZipFile(zip_file + '.zip', 'w') as zip_file:
             zip_file.write(csv_name)
             print("Success!")
 
