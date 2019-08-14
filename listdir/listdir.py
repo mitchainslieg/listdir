@@ -1,5 +1,6 @@
 from argparse import RawTextHelpFormatter
 from datetime import datetime
+from logging.handlers import RotatingFileHandler
 import configparser
 import zipfile
 import hashlib
@@ -7,6 +8,25 @@ import argparse
 import os.path
 import glob
 import time
+import logging
+import logging.config
+import yaml
+
+def setup_logging(default_path='log_config.yaml', default_level=logging.INFO, env_key='LOG_CFG'):
+    """Setup logging configuration
+
+    """
+    path = os.path.realpath(default_path)
+    value = os.getenv(env_key, None)
+    if value:
+        path = value
+    if os.path.exists(path):
+        with open(path, 'rt') as f:
+            config = yaml.safe_load(f.read())
+        logging.config.dictConfig(config)
+    else:
+        logging.warning('log_config.yaml doesn\'t exist!')
+        logging.basicConfig(level=default_level)
     
 def get_file_hasher(dir_path):
     
@@ -40,6 +60,7 @@ def generate_file_info(file_rpath):
             A dictionary that contains information for each file inside the directory
 
     """
+    logging.info(f"Fetching all files in {file_rpath}")
     files = glob.iglob(f"{file_rpath}/**/*.*", recursive=True)
     files_directory = [os.path.realpath(file_path) for file_path in files if os.path.isfile(file_path)]
     for file_dir in files_directory:
@@ -52,13 +73,13 @@ def generate_file_info(file_rpath):
         }
         yield file_info
 
-def export_csv(dir_path, csv_name, include_date, include_time):
+def export_csv(dir_path, destination_file, include_date, include_time):
 
     """Generates a file containing path, name, size, md5 and sha1 of files within the directory
     
     Arguments:
         dir_path -- Contains the path of the directory or folder
-        csv_name -- Contains the name the user want for his or her CSV file
+        destination_file -- Contains the name the user want for his or her file
         include_date -- a boolean type variable, if set as true, the date is concatenated in the file name
         include_time -- a boolean type variable, if set as true, the time is concatenated in the file name
 
@@ -71,7 +92,7 @@ def export_csv(dir_path, csv_name, include_date, include_time):
     timestamp_date = timestamp.strftime("%Y-%m-%d")
     timestamp_time = timestamp.strftime("%H-%M-%S")
 
-    zip_name = csv_name
+    zip_name = destination_file
     if include_date and include_time:
         zip_name += f" {timestamp_date}_{timestamp_time}"
     elif include_date:
@@ -82,14 +103,18 @@ def export_csv(dir_path, csv_name, include_date, include_time):
     file_rpath = os.path.realpath(dir_path)
     
     try:
-        print("Running...")
-        with open(csv_name, "w") as new_file:
+        generated_filename = os.path.basename(destination_file)
+        generated_zipname = os.path.basename(zip_name)
+
+        with open(destination_file, "w") as new_file:
             for line in generate_file_info(file_rpath):
                 new_file.write(f"{line['parent_path']},{line['file_name']},{line['file_size']},{line['md5']},{line['sha1']}\n")
+            logging.info(f"Generating {generated_filename} and {generated_zipname}.zip")
         
         with zipfile.ZipFile(zip_name + '.zip', 'w') as zip_file:    
-            zip_file.write(csv_name)
-            print("Success!")
+            zip_file.write(destination_file)
+        
+        logging.info(f"Success! {generated_filename} and {generated_zipname}.zip was generated!")
 
     except Exception as e:
         return e
@@ -120,20 +145,25 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--time", action="store_true", help="Include time in the file name", default='')
     user_inp = parser.parse_args()
 
+    # Setup logging and read config.ini for default values
+    setup_logging()
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read(os.path.realpath(f"config.ini"))
 
-    if not os.path.isdir(user_inp.directory):
-        if "/" in user_inp.directory or "\\" in user_inp.directory:
-            print(f"Invalid path or file name")
-        else:
-            if user_inp.directory == '':
-                file_name = config['default']['output_name']
-            else:
-                file_name = user_inp.directory
-            config_dir = os.path.realpath(config['default']['directory'])
-            export_csv(config_dir, file_name, user_inp.date, user_inp.time)
-    elif user_inp.file_name == '':
-        export_csv(user_inp.directory, os.path.realpath(config['default']['output_name']), user_inp.date, user_inp.time)
+    if not os.path.exists(os.path.realpath('config.ini')):
+        logging.warning("config.ini doesn't exist!")
     else:
-        export_csv(user_inp.directory, user_inp.file_name, user_inp.date, user_inp.time)
+        if not os.path.isdir(user_inp.directory):
+            if "/" in user_inp.directory or "\\" in user_inp.directory:
+                logging.error("Invalid Directory or File Name")
+            else:
+                if user_inp.directory == '':
+                    file_name = config['default']['output_name']
+                else:
+                    file_name = user_inp.directory
+                config_dir = os.path.realpath(config['default']['directory'])
+                export_csv(config_dir, file_name, user_inp.date, user_inp.time)
+        elif user_inp.file_name == '':
+            export_csv(user_inp.directory, os.path.realpath(config['default']['output_name']), user_inp.date, user_inp.time)
+        else:
+            export_csv(user_inp.directory, user_inp.file_name, user_inp.date, user_inp.time)
